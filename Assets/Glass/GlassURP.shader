@@ -46,11 +46,12 @@ Shader "Nihit/GlassURP"
             #pragma target 2.0
             #pragma multi_compile_instancing
             #pragma multi_compile_fog
-            #pragma instancing_options renderinglayer
+            //#pragma instancing_options renderinglayer
             #pragma vertex vert
             #pragma fragment frag
 
             // Keywords
+            /*
             #pragma multi_compile_fragment _ _SCREEN_SPACE_OCCLUSION
             #pragma multi_compile _ LIGHTMAP_ON
             #pragma multi_compile _ DYNAMICLIGHTMAP_ON
@@ -69,42 +70,44 @@ Shader "Nihit/GlassURP"
             #pragma multi_compile_fragment _ _LIGHT_COOKIES
             #pragma multi_compile _ _FORWARD_PLUS
             #pragma multi_compile _ EVALUATE_SH_MIXED EVALUATE_SH_VERTEX
+            */
 
             // Defines
-            #define _NORMALMAP 1
-            #define _NORMAL_DROPOFF_TS 1
+            //#define _NORMALMAP 1
+            //#define _NORMAL_DROPOFF_TS 1
             #define ATTRIBUTES_NEED_NORMAL
             #define ATTRIBUTES_NEED_TANGENT
-            #define ATTRIBUTES_NEED_TEXCOORD0
-            #define ATTRIBUTES_NEED_TEXCOORD1
-            #define ATTRIBUTES_NEED_TEXCOORD2
+            //#define ATTRIBUTES_NEED_TEXCOORD0
+            //#define ATTRIBUTES_NEED_TEXCOORD1
+            //#define ATTRIBUTES_NEED_TEXCOORD2
             #define VARYINGS_NEED_POSITION_WS
             #define VARYINGS_NEED_NORMAL_WS
             #define VARYINGS_NEED_TANGENT_WS
             #define VARYINGS_NEED_TEXCOORD0
-            #define VARYINGS_NEED_FOG_AND_VERTEX_LIGHT
+            //#define VARYINGS_NEED_FOG_AND_VERTEX_LIGHT
             #define VARYINGS_NEED_SHADOW_COORD
-            #define FEATURES_GRAPH_VERTEX
-            #define SHADERPASS SHADERPASS_FORWARD
-            #define _FOG_FRAGMENT 1
-            #define _SURFACE_TYPE_TRANSPARENT 1
+            //#define FEATURES_GRAPH_VERTEX
+            //#define SHADERPASS SHADERPASS_FORWARD
+            //#define _FOG_FRAGMENT 1
+            //#define _SURFACE_TYPE_TRANSPARENT 1
             #define REQUIRE_OPAQUE_TEXTURE
 
             // Includes
-            #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DOTS.hlsl"
-            #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/RenderingLayers.hlsl"
+            //#include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DOTS.hlsl"
+            //#include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/RenderingLayers.hlsl"
             #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
             #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Texture.hlsl"
-            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+            //#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
-            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Input.hlsl"
-            #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/TextureStack.hlsl"
-            #include_with_pragmas "Packages/com.unity.render-pipelines.core/ShaderLibrary/FoveatedRenderingKeywords.hlsl"
-            #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/FoveatedRendering.hlsl"
-            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Shadows.hlsl"
-            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/ShaderGraphFunctions.hlsl"
-            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DBuffer.hlsl"
-            #include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/ShaderPass.hlsl"
+            //#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Input.hlsl"
+            //#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/TextureStack.hlsl"
+            //#include_with_pragmas "Packages/com.unity.render-pipelines.core/ShaderLibrary/FoveatedRenderingKeywords.hlsl"
+            //#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/FoveatedRendering.hlsl"
+            //#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Shadows.hlsl"
+            //#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/ShaderGraphFunctions.hlsl"
+            //#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DBuffer.hlsl"
+            //#include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/ShaderPass.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareOpaqueTexture.hlsl"
 
             // Structs and Packing
             struct Attributes
@@ -453,12 +456,18 @@ Shader "Nihit/GlassURP"
 
             void Unity_SceneColor_float(float4 UV, out float3 Out)
             {
-                Out = SHADERGRAPH_SAMPLE_SCENE_COLOR(UV.xy);
+                Out = SampleSceneColor(UV.xy);
+            }
+
+            float3 SampleReflectionProbe(float3 viewDir, float3 normalOS, float lod)
+            {
+                float3 reflectVec = reflect(-viewDir, normalOS);
+                return DecodeHDREnvironment(SAMPLE_TEXTURECUBE_LOD(unity_SpecCube0, samplerunity_SpecCube0, reflectVec, lod), unity_SpecCube0_HDR);
             }
 
             void Unity_ReflectionProbe_float(float3 ViewDir, float3 Normal, float LOD, out float3 Out)
             {
-                Out = SHADERGRAPH_REFLECTION_PROBE(ViewDir, Normal, LOD);
+                Out = SampleReflectionProbe(ViewDir, Normal, LOD);
             }
 
             void Unity_Add_float(float A, float B, out float Out)
