@@ -560,7 +560,7 @@ Shader "Nihit/GlassURP"
 
             }
 
-            void frag(PackedVaryings packedInput, out half4 outColor : SV_Target0)
+            half4 frag(PackedVaryings packedInput) : SV_Target
             {
                 Varyings unpacked = UnpackVaryings(packedInput);
                 UNITY_SETUP_INSTANCE_ID(unpacked);
@@ -601,7 +601,7 @@ Shader "Nihit/GlassURP"
 
                 color.a = OutputAlpha(color.a, isTransparent);
 
-                outColor = color;
+                return color;
             }
 
             ENDHLSL
