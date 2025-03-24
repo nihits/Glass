@@ -57,10 +57,39 @@ Shader "Nihit/GlassURP"
 
             #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
             #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Texture.hlsl"
+            #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Hashes.hlsl"
+
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Input.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareOpaqueTexture.hlsl"
+
+            CBUFFER_START(UnityPerMaterial)
+                float _DisortStrength;
+                float _NormalStrength;
+                float4 _TintColor;
+                float2 _Offset;
+                float _Tiling;
+                float _Metallic;
+                float _Smoothness;
+                float _ReflectionStrength;
+                float4 _TintTexture_TexelSize;
+                float4 _TintTexture_ST;
+                float _DistortionOnTexture;
+            CBUFFER_END
+
+            SAMPLER(SamplerState_Linear_Repeat);
+            TEXTURE2D(_TintTexture);
+            SAMPLER(sampler_TintTexture);
+
+#if (SHADERPASS == SHADERPASS_SHADOWCASTER)
+            float3 _LightDirection;
+            float3 _LightPosition;
+#endif
+
+            ////////////////////////////////////////////////////////////////////
+
+            // Vert
 
             struct Attributes
             {
@@ -71,6 +100,41 @@ Shader "Nihit/GlassURP"
                 float4 uv1 : TEXCOORD1;
                 float4 uv2 : TEXCOORD2;
             };
+
+            struct VertexDescriptionInputs
+            {
+                float3 ObjectSpaceNormal;
+                float3 ObjectSpaceTangent;
+                float3 ObjectSpacePosition;
+            };
+
+            VertexDescriptionInputs BuildVertexDescriptionInputs(Attributes input)
+            {
+                VertexDescriptionInputs output;
+                ZERO_INITIALIZE(VertexDescriptionInputs, output);
+
+                output.ObjectSpaceNormal = input.normalOS;
+                output.ObjectSpaceTangent = input.tangentOS.xyz;
+                output.ObjectSpacePosition = input.positionOS;
+
+                return output;
+            }
+
+            struct VertexDescription
+            {
+                float3 Position;
+                float3 Normal;
+                float3 Tangent;
+            };
+
+            VertexDescription VertexDescriptionFunction(VertexDescriptionInputs IN)
+            {
+                VertexDescription description = (VertexDescription)0;
+                description.Position = IN.ObjectSpacePosition;
+                description.Normal = IN.ObjectSpaceNormal;
+                description.Tangent = IN.ObjectSpaceTangent;
+                return description;
+            }
 
             struct Varyings
             {
@@ -88,25 +152,69 @@ Shader "Nihit/GlassURP"
 
             };
 
-            struct SurfaceDescriptionInputs
+            Varyings BuildVaryings(Attributes input)
             {
-                float3 WorldSpaceNormal;
-                float3 TangentSpaceNormal;
-                float3 WorldSpaceTangent;
-                float3 WorldSpaceBiTangent;
-                float3 WorldSpaceViewDirection;
-                float3 WorldSpacePosition;
-                float2 NDCPosition;
-                float2 PixelPosition;
-                float4 uv0;
-            };
+                Varyings output = (Varyings)0;
 
-            struct VertexDescriptionInputs
-            {
-                float3 ObjectSpaceNormal;
-                float3 ObjectSpaceTangent;
-                float3 ObjectSpacePosition;
-            };
+                UNITY_SETUP_INSTANCE_ID(input);
+
+                UNITY_TRANSFER_INSTANCE_ID(input, output);
+
+                UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
+
+                VertexPositionInputs vertexInput = GetVertexPositionInputs(input.positionOS.xyz);
+
+                float3 positionWS = TransformObjectToWorld(input.positionOS);
+
+#ifdef ATTRIBUTES_NEED_NORMAL
+                float3 normalWS = TransformObjectToWorldNormal(input.normalOS);
+#endif
+
+#ifdef ATTRIBUTES_NEED_TANGENT
+                float4 tangentWS = float4(TransformObjectToWorldDir(input.tangentOS.xyz), input.tangentOS.w);
+#endif
+
+#ifdef VARYINGS_NEED_POSITION_WS
+                output.positionWS = positionWS;
+#endif
+
+#ifdef VARYINGS_NEED_NORMAL_WS
+                output.normalWS = normalWS;
+#endif
+
+#ifdef VARYINGS_NEED_TANGENT_WS
+                output.tangentWS = tangentWS;
+#endif
+
+#if (SHADERPASS == SHADERPASS_SHADOWCASTER)
+    #if _CASTING_PUNCTUAL_LIGHT_SHADOW
+                float3 lightDirectionWS = normalize(_LightPosition - positionWS);
+    #else
+                float3 lightDirectionWS = _LightDirection;
+    #endif
+                output.positionCS = TransformWorldToHClip(ApplyShadowBias(positionWS, normalWS, lightDirectionWS));
+    #if UNITY_REVERSED_Z
+                output.positionCS.z = min(output.positionCS.z, UNITY_NEAR_CLIP_VALUE);
+    #else
+                output.positionCS.z = max(output.positionCS.z, UNITY_NEAR_CLIP_VALUE);
+    #endif
+#elif (SHADERPASS == SHADERPASS_META)
+                output.positionCS = UnityMetaVertexPosition(input.positionOS, input.uv1.xy, input.uv2.xy, unity_LightmapST, unity_DynamicLightmapST);
+#else
+                output.positionCS = TransformWorldToHClip(positionWS);
+#endif
+
+#if defined(VARYINGS_NEED_TEXCOORD0) || defined(VARYINGS_DS_NEED_TEXCOORD0)
+                output.texCoord0 = input.uv0;
+#endif
+
+#if (SHADERPASS == SHADERPASS_FORWARD) || (SHADERPASS == SHADERPASS_GBUFFER)
+                OUTPUT_LIGHTMAP_UV(input.uv1, unity_LightmapST, output.staticLightmapUV);
+                OUTPUT_SH(normalWS, output.sh);
+#endif
+
+                return output;
+            }
 
             struct PackedVaryings
             {
@@ -144,6 +252,19 @@ Shader "Nihit/GlassURP"
                 return output;
             }
 
+            PackedVaryings vert(Attributes input)
+            {
+                Varyings output = (Varyings)0;
+                output = BuildVaryings(input);
+                PackedVaryings packedOutput = (PackedVaryings)0;
+                packedOutput = PackVaryings(output);
+                return packedOutput;
+            }
+
+            ////////////////////////////////////////////////////////////////////
+
+            // Frag
+
             Varyings UnpackVaryings (PackedVaryings input)
             {
                 Varyings output;
@@ -162,25 +283,63 @@ Shader "Nihit/GlassURP"
                 return output;
             }
 
-            CBUFFER_START(UnityPerMaterial)
-                float _DisortStrength;
-                float _NormalStrength;
-                float4 _TintColor;
-                float2 _Offset;
-                float _Tiling;
-                float _Metallic;
-                float _Smoothness;
-                float _ReflectionStrength;
-                float4 _TintTexture_TexelSize;
-                float4 _TintTexture_ST;
-                float _DistortionOnTexture;
-            CBUFFER_END
+            struct SurfaceDescriptionInputs
+            {
+                float3 WorldSpaceNormal;
+                float3 TangentSpaceNormal;
+                float3 WorldSpaceTangent;
+                float3 WorldSpaceBiTangent;
+                float3 WorldSpaceViewDirection;
+                float3 WorldSpacePosition;
+                float2 NDCPosition;
+                float2 PixelPosition;
+                float4 uv0;
+            };
 
-            SAMPLER(SamplerState_Linear_Repeat);
-            TEXTURE2D(_TintTexture);
-            SAMPLER(sampler_TintTexture);
+            SurfaceDescriptionInputs BuildSurfaceDescriptionInputs(Varyings input)
+            {
+                SurfaceDescriptionInputs output;
+                ZERO_INITIALIZE(SurfaceDescriptionInputs, output);
 
-            #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Hashes.hlsl"
+                float3 unnormalizedNormalWS = input.normalWS;
+                const float renormFactor = 1.0 / length(unnormalizedNormalWS);
+
+                float crossSign = (input.tangentWS.w > 0.0 ? 1.0 : -1.0)* GetOddNegativeScale();
+                float3 bitang = crossSign * cross(input.normalWS.xyz, input.tangentWS.xyz);
+
+                output.WorldSpaceNormal = renormFactor * input.normalWS.xyz;
+                output.TangentSpaceNormal = float3(0.0f, 0.0f, 1.0f);
+
+                output.WorldSpaceTangent = renormFactor * input.tangentWS.xyz;
+                output.WorldSpaceBiTangent = renormFactor * bitang;
+
+                output.WorldSpaceViewDirection = GetWorldSpaceNormalizeViewDir(input.positionWS);
+                output.WorldSpacePosition = input.positionWS;
+
+#if UNITY_UV_STARTS_AT_TOP
+                output.PixelPosition = float2(input.positionCS.x, (_ProjectionParams.x < 0) ? (_ScaledScreenParams.y - input.positionCS.y) : input.positionCS.y);
+#else
+                output.PixelPosition = float2(input.positionCS.x, (_ProjectionParams.x > 0) ? (_ScaledScreenParams.y - input.positionCS.y) : input.positionCS.y);
+#endif
+
+                output.NDCPosition = output.PixelPosition.xy / _ScaledScreenParams.xy;
+                output.NDCPosition.y = 1.0f - output.NDCPosition.y;
+
+                output.uv0 = input.texCoord0;
+
+                return output;
+            }
+
+            struct SurfaceDescription
+            {
+                float3 BaseColor;
+                float3 NormalTS;
+                float3 Emission;
+                float Metallic;
+                float Smoothness;
+                float Occlusion;
+                float Alpha;
+            };
 
             void Unity_TilingAndOffset_float(float2 UV, float2 Tiling, float2 Offset, out float2 Out)
             {
@@ -286,33 +445,6 @@ Shader "Nihit/GlassURP"
                 Out = A + B;
             }
 
-            struct VertexDescription
-            {
-                float3 Position;
-                float3 Normal;
-                float3 Tangent;
-            };
-
-            VertexDescription VertexDescriptionFunction(VertexDescriptionInputs IN)
-            {
-                VertexDescription description = (VertexDescription)0;
-                description.Position = IN.ObjectSpacePosition;
-                description.Normal = IN.ObjectSpaceNormal;
-                description.Tangent = IN.ObjectSpaceTangent;
-                return description;
-            }
-
-            struct SurfaceDescription
-            {
-                float3 BaseColor;
-                float3 NormalTS;
-                float3 Emission;
-                float Metallic;
-                float Smoothness;
-                float Occlusion;
-                float Alpha;
-            };
-
             SurfaceDescription SurfaceDescriptionFunction(SurfaceDescriptionInputs IN)
             {
                 SurfaceDescription surface = (SurfaceDescription)0;
@@ -384,121 +516,6 @@ Shader "Nihit/GlassURP"
                 return surface;
             }
 
-            VertexDescriptionInputs BuildVertexDescriptionInputs(Attributes input)
-            {
-                VertexDescriptionInputs output;
-                ZERO_INITIALIZE(VertexDescriptionInputs, output);
-
-                output.ObjectSpaceNormal = input.normalOS;
-                output.ObjectSpaceTangent = input.tangentOS.xyz;
-                output.ObjectSpacePosition = input.positionOS;
-
-                return output;
-            }
-
-            SurfaceDescriptionInputs BuildSurfaceDescriptionInputs(Varyings input)
-            {
-                SurfaceDescriptionInputs output;
-                ZERO_INITIALIZE(SurfaceDescriptionInputs, output);
-
-                float3 unnormalizedNormalWS = input.normalWS;
-                const float renormFactor = 1.0 / length(unnormalizedNormalWS);
-
-                float crossSign = (input.tangentWS.w > 0.0 ? 1.0 : -1.0)* GetOddNegativeScale();
-                float3 bitang = crossSign * cross(input.normalWS.xyz, input.tangentWS.xyz);
-
-                output.WorldSpaceNormal = renormFactor * input.normalWS.xyz;
-                output.TangentSpaceNormal = float3(0.0f, 0.0f, 1.0f);
-
-                output.WorldSpaceTangent = renormFactor * input.tangentWS.xyz;
-                output.WorldSpaceBiTangent = renormFactor * bitang;
-
-                output.WorldSpaceViewDirection = GetWorldSpaceNormalizeViewDir(input.positionWS);
-                output.WorldSpacePosition = input.positionWS;
-
-#if UNITY_UV_STARTS_AT_TOP
-                output.PixelPosition = float2(input.positionCS.x, (_ProjectionParams.x < 0) ? (_ScaledScreenParams.y - input.positionCS.y) : input.positionCS.y);
-#else
-                output.PixelPosition = float2(input.positionCS.x, (_ProjectionParams.x > 0) ? (_ScaledScreenParams.y - input.positionCS.y) : input.positionCS.y);
-#endif
-
-                output.NDCPosition = output.PixelPosition.xy / _ScaledScreenParams.xy;
-                output.NDCPosition.y = 1.0f - output.NDCPosition.y;
-
-                output.uv0 = input.texCoord0;
-
-                return output;
-            }
-
-#if (SHADERPASS == SHADERPASS_SHADOWCASTER)
-            float3 _LightDirection;
-            float3 _LightPosition;
-#endif
-
-            Varyings BuildVaryings(Attributes input)
-            {
-                Varyings output = (Varyings)0;
-
-                UNITY_SETUP_INSTANCE_ID(input);
-
-                UNITY_TRANSFER_INSTANCE_ID(input, output);
-
-                UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
-
-                VertexPositionInputs vertexInput = GetVertexPositionInputs(input.positionOS.xyz);
-
-                float3 positionWS = TransformObjectToWorld(input.positionOS);
-
-#ifdef ATTRIBUTES_NEED_NORMAL
-                float3 normalWS = TransformObjectToWorldNormal(input.normalOS);
-#endif
-
-#ifdef ATTRIBUTES_NEED_TANGENT
-                float4 tangentWS = float4(TransformObjectToWorldDir(input.tangentOS.xyz), input.tangentOS.w);
-#endif
-
-#ifdef VARYINGS_NEED_POSITION_WS
-                output.positionWS = positionWS;
-#endif
-
-#ifdef VARYINGS_NEED_NORMAL_WS
-                output.normalWS = normalWS;
-#endif
-
-#ifdef VARYINGS_NEED_TANGENT_WS
-                output.tangentWS = tangentWS;
-#endif
-
-#if (SHADERPASS == SHADERPASS_SHADOWCASTER)
-    #if _CASTING_PUNCTUAL_LIGHT_SHADOW
-                float3 lightDirectionWS = normalize(_LightPosition - positionWS);
-    #else
-                float3 lightDirectionWS = _LightDirection;
-    #endif
-                output.positionCS = TransformWorldToHClip(ApplyShadowBias(positionWS, normalWS, lightDirectionWS));
-    #if UNITY_REVERSED_Z
-                output.positionCS.z = min(output.positionCS.z, UNITY_NEAR_CLIP_VALUE);
-    #else
-                output.positionCS.z = max(output.positionCS.z, UNITY_NEAR_CLIP_VALUE);
-    #endif
-#elif (SHADERPASS == SHADERPASS_META)
-                output.positionCS = UnityMetaVertexPosition(input.positionOS, input.uv1.xy, input.uv2.xy, unity_LightmapST, unity_DynamicLightmapST);
-#else
-                output.positionCS = TransformWorldToHClip(positionWS);
-#endif
-
-#if defined(VARYINGS_NEED_TEXCOORD0) || defined(VARYINGS_DS_NEED_TEXCOORD0)
-                output.texCoord0 = input.uv0;
-#endif
-
-#if (SHADERPASS == SHADERPASS_FORWARD) || (SHADERPASS == SHADERPASS_GBUFFER)
-                OUTPUT_LIGHTMAP_UV(input.uv1, unity_LightmapST, output.staticLightmapUV);
-                OUTPUT_SH(normalWS, output.sh);
-#endif
-
-                return output;
-            }
-
             SurfaceDescription BuildSurfaceDescription(Varyings varyings)
             {
                 SurfaceDescriptionInputs surfaceDescriptionInputs = BuildSurfaceDescriptionInputs(varyings);
@@ -513,19 +530,19 @@ Shader "Nihit/GlassURP"
                 inputData.positionWS = input.positionWS;
 
 #ifdef _NORMALMAP
-                    float crossSign = (input.tangentWS.w > 0.0 ? 1.0 : -1.0) * GetOddNegativeScale();
-                    float3 bitangent = crossSign * cross(input.normalWS.xyz, input.tangentWS.xyz);
+                float crossSign = (input.tangentWS.w > 0.0 ? 1.0 : -1.0) * GetOddNegativeScale();
+                float3 bitangent = crossSign * cross(input.normalWS.xyz, input.tangentWS.xyz);
 
-                    inputData.tangentToWorld = half3x3(input.tangentWS.xyz, bitangent.xyz, input.normalWS.xyz);
+                inputData.tangentToWorld = half3x3(input.tangentWS.xyz, bitangent.xyz, input.normalWS.xyz);
     #if _NORMAL_DROPOFF_TS
-                        inputData.normalWS = TransformTangentToWorld(surfaceDescription.NormalTS, inputData.tangentToWorld);
+                inputData.normalWS = TransformTangentToWorld(surfaceDescription.NormalTS, inputData.tangentToWorld);
     #elif _NORMAL_DROPOFF_OS
-                        inputData.normalWS = TransformObjectToWorldNormal(surfaceDescription.NormalOS);
+                inputData.normalWS = TransformObjectToWorldNormal(surfaceDescription.NormalOS);
     #elif _NORMAL_DROPOFF_WS
-                        inputData.normalWS = surfaceDescription.NormalWS;
+                inputData.normalWS = surfaceDescription.NormalWS;
     #endif
 #else
-                    inputData.normalWS = input.normalWS;
+                inputData.normalWS = input.normalWS;
 #endif
 
                 inputData.normalWS = NormalizeNormalPerPixel(inputData.normalWS);
@@ -541,15 +558,6 @@ Shader "Nihit/GlassURP"
                 inputData.normalizedScreenSpaceUV = GetNormalizedScreenSpaceUV(input.positionCS);
                 inputData.shadowMask = SAMPLE_SHADOWMASK(input.staticLightmapUV);
 
-            }
-
-            PackedVaryings vert(Attributes input)
-            {
-                Varyings output = (Varyings)0;
-                output = BuildVaryings(input);
-                PackedVaryings packedOutput = (PackedVaryings)0;
-                packedOutput = PackVaryings(output);
-                return packedOutput;
             }
 
             void frag(PackedVaryings packedInput, out half4 outColor : SV_Target0)
