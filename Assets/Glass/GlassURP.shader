@@ -73,8 +73,8 @@ Shader "Nihit/GlassURP"
             */
 
             // Defines
-            //#define _NORMALMAP 1
-            //#define _NORMAL_DROPOFF_TS 1
+            #define _NORMALMAP 1
+            #define _NORMAL_DROPOFF_TS 1
             #define ATTRIBUTES_NEED_NORMAL
             #define ATTRIBUTES_NEED_TANGENT
             //#define ATTRIBUTES_NEED_TEXCOORD0
@@ -119,9 +119,9 @@ Shader "Nihit/GlassURP"
                 float4 uv1 : TEXCOORD1;
                 float4 uv2 : TEXCOORD2;
 
-#if UNITY_ANY_INSTANCING_ENABLED
-                uint instanceID : INSTANCEID_SEMANTIC;
-#endif
+//#if UNITY_ANY_INSTANCING_ENABLED
+                //uint instanceID : INSTANCEID_SEMANTIC;
+//#endif
 
             };
 
@@ -133,13 +133,13 @@ Shader "Nihit/GlassURP"
                 float4 tangentWS;
                 float4 texCoord0;
 
-#if defined(LIGHTMAP_ON)
-                float2 staticLightmapUV;
-#endif
+//#if defined(LIGHTMAP_ON)
+                //float2 staticLightmapUV;
+//#endif
 
-#if defined(DYNAMICLIGHTMAP_ON)
-                float2 dynamicLightmapUV;
-#endif
+//#if defined(DYNAMICLIGHTMAP_ON)
+                //float2 dynamicLightmapUV;
+//#endif
 
 #if !defined(LIGHTMAP_ON)
                 float3 sh;
@@ -147,25 +147,25 @@ Shader "Nihit/GlassURP"
 
                 float4 fogFactorAndVertexLight;
 
-#if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
-                float4 shadowCoord;
-#endif
+//#if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
+                //float4 shadowCoord;
+//#endif
 
-#if UNITY_ANY_INSTANCING_ENABLED
-                uint instanceID : CUSTOM_INSTANCE_ID;
-#endif
+//#if UNITY_ANY_INSTANCING_ENABLED
+                //uint instanceID : CUSTOM_INSTANCE_ID;
+//#endif
 
-#if (defined(UNITY_STEREO_MULTIVIEW_ENABLED)) || (defined(UNITY_STEREO_INSTANCING_ENABLED) && (defined(SHADER_API_GLES3) || defined(SHADER_API_GLCORE)))
-                uint stereoTargetEyeIndexAsBlendIdx0 : BLENDINDICES0;
-#endif
+//#if (defined(UNITY_STEREO_MULTIVIEW_ENABLED)) || (defined(UNITY_STEREO_INSTANCING_ENABLED) && (defined(SHADER_API_GLES3) || defined(SHADER_API_GLCORE)))
+                //uint stereoTargetEyeIndexAsBlendIdx0 : BLENDINDICES0;
+//#endif
 
-#if (defined(UNITY_STEREO_INSTANCING_ENABLED))
-                uint stereoTargetEyeIndexAsRTArrayIdx : SV_RenderTargetArrayIndex;
-#endif
+//#if (defined(UNITY_STEREO_INSTANCING_ENABLED))
+                //uint stereoTargetEyeIndexAsRTArrayIdx : SV_RenderTargetArrayIndex;
+//#endif
 
-#if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
-                FRONT_FACE_TYPE cullFace : FRONT_FACE_SEMANTIC;
-#endif
+//#if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
+                //FRONT_FACE_TYPE cullFace : FRONT_FACE_SEMANTIC;
+//#endif
 
             };
 
@@ -193,21 +193,21 @@ Shader "Nihit/GlassURP"
             {
                 float4 positionCS : SV_POSITION;
 
-#if defined(LIGHTMAP_ON)
-                float2 staticLightmapUV : INTERP0;
-#endif
+//#if defined(LIGHTMAP_ON)
+                //float2 staticLightmapUV : INTERP0;
+//#endif
 
-#if defined(DYNAMICLIGHTMAP_ON)
-                float2 dynamicLightmapUV : INTERP1;
-#endif
+//#if defined(DYNAMICLIGHTMAP_ON)
+                //float2 dynamicLightmapUV : INTERP1;
+//#endif
 
 #if !defined(LIGHTMAP_ON)
                 float3 sh : INTERP2;
 #endif
 
-#if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
-                float4 shadowCoord : INTERP3;
-#endif
+//#if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
+                //float4 shadowCoord : INTERP3;
+//#endif
 
                 float4 tangentWS : INTERP4;
                 float4 texCoord0 : INTERP5;
@@ -215,21 +215,21 @@ Shader "Nihit/GlassURP"
                 float3 positionWS : INTERP7;
                 float3 normalWS : INTERP8;
 
-#if UNITY_ANY_INSTANCING_ENABLED
-                uint instanceID : CUSTOM_INSTANCE_ID;
-#endif
+//#if UNITY_ANY_INSTANCING_ENABLED
+                //uint instanceID : CUSTOM_INSTANCE_ID;
+//#endif
 
-#if (defined(UNITY_STEREO_MULTIVIEW_ENABLED)) || (defined(UNITY_STEREO_INSTANCING_ENABLED) && (defined(SHADER_API_GLES3) || defined(SHADER_API_GLCORE)))
-                uint stereoTargetEyeIndexAsBlendIdx0 : BLENDINDICES0;
-#endif
+//#if (defined(UNITY_STEREO_MULTIVIEW_ENABLED)) || (defined(UNITY_STEREO_INSTANCING_ENABLED) && (defined(SHADER_API_GLES3) || defined(SHADER_API_GLCORE)))
+                //uint stereoTargetEyeIndexAsBlendIdx0 : BLENDINDICES0;
+//#endif
 
-#if (defined(UNITY_STEREO_INSTANCING_ENABLED))
-                uint stereoTargetEyeIndexAsRTArrayIdx : SV_RenderTargetArrayIndex;
-#endif
+//#if (defined(UNITY_STEREO_INSTANCING_ENABLED))
+                //uint stereoTargetEyeIndexAsRTArrayIdx : SV_RenderTargetArrayIndex;
+//#endif
 
-#if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
-                FRONT_FACE_TYPE cullFace : FRONT_FACE_SEMANTIC;
-#endif
+//#if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
+                //FRONT_FACE_TYPE cullFace : FRONT_FACE_SEMANTIC;
+//#endif
 
             };
 
@@ -240,21 +240,21 @@ Shader "Nihit/GlassURP"
 
                 output.positionCS = input.positionCS;
 
-#if defined(LIGHTMAP_ON)
-                output.staticLightmapUV = input.staticLightmapUV;
-#endif
+//#if defined(LIGHTMAP_ON)
+                //output.staticLightmapUV = input.staticLightmapUV;
+//#endif
 
-#if defined(DYNAMICLIGHTMAP_ON)
-                output.dynamicLightmapUV = input.dynamicLightmapUV;
-#endif
+//#if defined(DYNAMICLIGHTMAP_ON)
+                //output.dynamicLightmapUV = input.dynamicLightmapUV;
+//#endif
 
 #if !defined(LIGHTMAP_ON)
                 output.sh = input.sh;
 #endif
 
-#if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
-                output.shadowCoord = input.shadowCoord;
-#endif
+//#if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
+                //output.shadowCoord = input.shadowCoord;
+//#endif
 
                 output.tangentWS.xyzw = input.tangentWS;
                 output.texCoord0.xyzw = input.texCoord0;
@@ -262,21 +262,21 @@ Shader "Nihit/GlassURP"
                 output.positionWS.xyz = input.positionWS;
                 output.normalWS.xyz = input.normalWS;
 
-#if UNITY_ANY_INSTANCING_ENABLED
-                output.instanceID = input.instanceID;
-#endif
+//#if UNITY_ANY_INSTANCING_ENABLED
+                //output.instanceID = input.instanceID;
+//#endif
 
-#if (defined(UNITY_STEREO_MULTIVIEW_ENABLED)) || (defined(UNITY_STEREO_INSTANCING_ENABLED) && (defined(SHADER_API_GLES3) || defined(SHADER_API_GLCORE)))
-                output.stereoTargetEyeIndexAsBlendIdx0 = input.stereoTargetEyeIndexAsBlendIdx0;
-#endif
+//#if (defined(UNITY_STEREO_MULTIVIEW_ENABLED)) || (defined(UNITY_STEREO_INSTANCING_ENABLED) && (defined(SHADER_API_GLES3) || defined(SHADER_API_GLCORE)))
+                //output.stereoTargetEyeIndexAsBlendIdx0 = input.stereoTargetEyeIndexAsBlendIdx0;
+//#endif
 
-#if (defined(UNITY_STEREO_INSTANCING_ENABLED))
-                output.stereoTargetEyeIndexAsRTArrayIdx = input.stereoTargetEyeIndexAsRTArrayIdx;
-#endif
+//#if (defined(UNITY_STEREO_INSTANCING_ENABLED))
+                //output.stereoTargetEyeIndexAsRTArrayIdx = input.stereoTargetEyeIndexAsRTArrayIdx;
+//#endif
 
-#if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
-                output.cullFace = input.cullFace;
-#endif
+//#if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
+                //output.cullFace = input.cullFace;
+//#endif
 
                 return output;
             }
@@ -286,21 +286,21 @@ Shader "Nihit/GlassURP"
                 Varyings output;
                 output.positionCS = input.positionCS;
 
-#if defined(LIGHTMAP_ON)
-                output.staticLightmapUV = input.staticLightmapUV;
-#endif
+//#if defined(LIGHTMAP_ON)
+                //output.staticLightmapUV = input.staticLightmapUV;
+//#endif
 
-#if defined(DYNAMICLIGHTMAP_ON)
-                output.dynamicLightmapUV = input.dynamicLightmapUV;
-#endif
+//#if defined(DYNAMICLIGHTMAP_ON)
+                //output.dynamicLightmapUV = input.dynamicLightmapUV;
+//#endif
 
 #if !defined(LIGHTMAP_ON)
                 output.sh = input.sh;
 #endif
 
-#if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
-                output.shadowCoord = input.shadowCoord;
-#endif
+//#if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
+                //output.shadowCoord = input.shadowCoord;
+//#endif
 
                 output.tangentWS = input.tangentWS.xyzw;
                 output.texCoord0 = input.texCoord0.xyzw;
@@ -308,21 +308,21 @@ Shader "Nihit/GlassURP"
                 output.positionWS = input.positionWS.xyz;
                 output.normalWS = input.normalWS.xyz;
 
-#if UNITY_ANY_INSTANCING_ENABLED
-                output.instanceID = input.instanceID;
-#endif
+//#if UNITY_ANY_INSTANCING_ENABLED
+                //output.instanceID = input.instanceID;
+//#endif
 
-#if (defined(UNITY_STEREO_MULTIVIEW_ENABLED)) || (defined(UNITY_STEREO_INSTANCING_ENABLED) && (defined(SHADER_API_GLES3) || defined(SHADER_API_GLCORE)))
-                output.stereoTargetEyeIndexAsBlendIdx0 = input.stereoTargetEyeIndexAsBlendIdx0;
-#endif
+//#if (defined(UNITY_STEREO_MULTIVIEW_ENABLED)) || (defined(UNITY_STEREO_INSTANCING_ENABLED) && (defined(SHADER_API_GLES3) || defined(SHADER_API_GLCORE)))
+                //output.stereoTargetEyeIndexAsBlendIdx0 = input.stereoTargetEyeIndexAsBlendIdx0;
+//#endif
 
-#if (defined(UNITY_STEREO_INSTANCING_ENABLED))
-                output.stereoTargetEyeIndexAsRTArrayIdx = input.stereoTargetEyeIndexAsRTArrayIdx;
-#endif
+//#if (defined(UNITY_STEREO_INSTANCING_ENABLED))
+                //output.stereoTargetEyeIndexAsRTArrayIdx = input.stereoTargetEyeIndexAsRTArrayIdx;
+//#endif
 
-#if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
-                output.cullFace = input.cullFace;
-#endif
+//#if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
+                //output.cullFace = input.cullFace;
+//#endif
 
                 return output;
             }
@@ -354,15 +354,15 @@ Shader "Nihit/GlassURP"
             #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Hashes.hlsl"
 
             // -- Property used by ScenePickingPass
-#ifdef SCENEPICKINGPASS
-            float4 _SelectionID;
-#endif
+//#ifdef SCENEPICKINGPASS
+            //float4 _SelectionID;
+//#endif
 
             // -- Properties used by SceneSelectionPass
-#ifdef SCENESELECTIONPASS
-            int _ObjectId;
-            int _PassValue;
-#endif
+//#ifdef SCENESELECTIONPASS
+            //int _ObjectId;
+            //int _PassValue;
+//#endif
 
             // Graph Functions
 
@@ -488,14 +488,14 @@ Shader "Nihit/GlassURP"
             }
 
             // Custom interpolators, pre surface
-#ifdef FEATURES_GRAPH_VERTEX
-            Varyings CustomInterpolatorPassThroughFunc(inout Varyings output, VertexDescription input)
-            {
-                return output;
-            }
+//#ifdef FEATURES_GRAPH_VERTEX
+            //Varyings CustomInterpolatorPassThroughFunc(inout Varyings output, VertexDescription input)
+            //{
+                //return output;
+            //}
 
-            #define CUSTOMINTERPOLATOR_VARYPASSTHROUGH_FUNC
-#endif
+            //#define CUSTOMINTERPOLATOR_VARYPASSTHROUGH_FUNC
+//#endif
 
             // Graph Pixel
             struct SurfaceDescription
@@ -582,11 +582,11 @@ Shader "Nihit/GlassURP"
 
             // --------------------------------------------------
             // Build Graph Inputs
-#ifdef HAVE_VFX_MODIFICATION
-            #define VFX_SRP_ATTRIBUTES Attributes
-            #define VFX_SRP_VARYINGS Varyings
-            #define VFX_SRP_SURFACE_INPUTS SurfaceDescriptionInputs
-#endif
+//#ifdef HAVE_VFX_MODIFICATION
+            //#define VFX_SRP_ATTRIBUTES Attributes
+            //#define VFX_SRP_VARYINGS Varyings
+            //#define VFX_SRP_SURFACE_INPUTS SurfaceDescriptionInputs
+//#endif
 
             VertexDescriptionInputs BuildVertexDescriptionInputs(Attributes input)
             {
@@ -605,11 +605,11 @@ Shader "Nihit/GlassURP"
                 SurfaceDescriptionInputs output;
                 ZERO_INITIALIZE(SurfaceDescriptionInputs, output);
 
-#ifdef HAVE_VFX_MODIFICATION
-    #if VFX_USE_GRAPH_VALUES
-                uint instanceActiveIndex = asuint(UNITY_ACCESS_INSTANCED_PROP(PerInstance, _InstanceActiveIndex));
-    #endif
-#endif
+//#ifdef HAVE_VFX_MODIFICATION
+    //#if VFX_USE_GRAPH_VALUES
+                //uint instanceActiveIndex = asuint(UNITY_ACCESS_INSTANCED_PROP(PerInstance, _InstanceActiveIndex));
+    //#endif
+//#endif
 
                 // must use interpolated tangent, bitangent and normal before they are normalized in the pixel shader.
                 float3 unnormalizedNormalWS = input.normalWS;
@@ -642,13 +642,13 @@ Shader "Nihit/GlassURP"
 
                 output.uv0 = input.texCoord0;
 
-#if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
-                #define BUILD_SURFACE_DESCRIPTION_INPUTS_OUTPUT_FACESIGN output.FaceSign =                    IS_FRONT_VFACE(input.cullFace, true, false);
-#else
-                #define BUILD_SURFACE_DESCRIPTION_INPUTS_OUTPUT_FACESIGN
-#endif
+//#if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
+                //#define BUILD_SURFACE_DESCRIPTION_INPUTS_OUTPUT_FACESIGN output.FaceSign =                    IS_FRONT_VFACE(input.cullFace, true, false);
+//#else
+                //#define BUILD_SURFACE_DESCRIPTION_INPUTS_OUTPUT_FACESIGN
+//#endif
 
-                #undef BUILD_SURFACE_DESCRIPTION_INPUTS_OUTPUT_FACESIGN
+                //#undef BUILD_SURFACE_DESCRIPTION_INPUTS_OUTPUT_FACESIGN
 
                 return output;
             }
@@ -661,12 +661,13 @@ Shader "Nihit/GlassURP"
                 // Shadow Casting Light geometric parameters. These variables are used when applying the shadow Normal Bias and are set by UnityEngine.Rendering.Universal.ShadowUtils.SetupShadowCasterConstantBuffer in com.unity.render-pipelines.universal/Runtime/ShadowUtils.cs
                 // For Directional lights, _LightDirection is used when applying shadow Normal Bias.
                 // For Spot lights and Point lights, _LightPosition is used to compute the actual light direction because it is different at each shadow caster geometry vertex.
-    #ifndef HAVE_VFX_MODIFICATION
+    //#ifndef HAVE_VFX_MODIFICATION
                 float3 _LightDirection;
-    #endif
+    //#endif
                 float3 _LightPosition;
 #endif
 
+/*
 #if defined(FEATURES_GRAPH_VERTEX)
     #if defined(HAVE_VFX_MODIFICATION)
             VertexDescription BuildVertexDescription(Attributes input, AttributesElement element)
@@ -691,6 +692,7 @@ Shader "Nihit/GlassURP"
             }
     #endif
 #endif
+*/
 
             Varyings BuildVaryings(Attributes input)
             {
@@ -700,6 +702,7 @@ Shader "Nihit/GlassURP"
 
                 UNITY_TRANSFER_INSTANCE_ID(input, output);
 
+/*
 #if defined(HAVE_VFX_MODIFICATION)
                 AttributesElement element;
                 ZERO_INITIALIZE(AttributesElement, element);
@@ -716,9 +719,11 @@ Shader "Nihit/GlassURP"
 
                 SetupVFXMatrices(element, output);
 #endif
+*/
 
                 UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
 
+/*
 #if defined(FEATURES_GRAPH_VERTEX)
 
     #if defined(HAVE_VFX_MODIFICATION)
@@ -728,18 +733,19 @@ Shader "Nihit/GlassURP"
     #endif
 
     #if defined(CUSTOMINTERPOLATOR_VARYPASSTHROUGH_FUNC)
-                    CustomInterpolatorPassThroughFunc(output, vertexDescription);
+                CustomInterpolatorPassThroughFunc(output, vertexDescription);
     #endif
 
                 // Assign modified vertex attributes
                 input.positionOS = vertexDescription.Position;
     #if defined(VARYINGS_NEED_NORMAL_WS)
-                    input.normalOS = vertexDescription.Normal;
+                input.normalOS = vertexDescription.Normal;
     #endif //FEATURES_GRAPH_NORMAL
     #if defined(VARYINGS_NEED_TANGENT_WS)
-                    input.tangentOS.xyz = vertexDescription.Tangent.xyz;
+                input.tangentOS.xyz = vertexDescription.Tangent.xyz;
     #endif //FEATURES GRAPH TANGENT
 #endif //FEATURES_GRAPH_VERTEX
+*/
 
                 // TODO: Avoid path via VertexPositionInputs (Universal)
                 VertexPositionInputs vertexInput = GetVertexPositionInputs(input.positionOS.xyz);
@@ -760,9 +766,9 @@ Shader "Nihit/GlassURP"
 
                 // TODO: Change to inline ifdef
                 // Do vertex modification in camera relative space (if enabled)
-#if defined(HAVE_VERTEX_MODIFICATION)
-                ApplyVertexModification(input, normalWS, positionWS, _TimeParameters.xyz);
-#endif
+//#if defined(HAVE_VERTEX_MODIFICATION)
+                //ApplyVertexModification(input, normalWS, positionWS, _TimeParameters.xyz);
+//#endif
 
 #ifdef VARYINGS_NEED_POSITION_WS
                 output.positionWS = positionWS;
@@ -779,15 +785,15 @@ Shader "Nihit/GlassURP"
 #if (SHADERPASS == SHADERPASS_SHADOWCASTER)
                 // Define shadow pass specific clip position for Universal
     #if _CASTING_PUNCTUAL_LIGHT_SHADOW
-                    float3 lightDirectionWS = normalize(_LightPosition - positionWS);
+                float3 lightDirectionWS = normalize(_LightPosition - positionWS);
     #else
-                    float3 lightDirectionWS = _LightDirection;
+                float3 lightDirectionWS = _LightDirection;
     #endif
                 output.positionCS = TransformWorldToHClip(ApplyShadowBias(positionWS, normalWS, lightDirectionWS));
     #if UNITY_REVERSED_Z
-                    output.positionCS.z = min(output.positionCS.z, UNITY_NEAR_CLIP_VALUE);
+                output.positionCS.z = min(output.positionCS.z, UNITY_NEAR_CLIP_VALUE);
     #else
-                    output.positionCS.z = max(output.positionCS.z, UNITY_NEAR_CLIP_VALUE);
+                output.positionCS.z = max(output.positionCS.z, UNITY_NEAR_CLIP_VALUE);
     #endif
 #elif (SHADERPASS == SHADERPASS_META)
                 output.positionCS = UnityMetaVertexPosition(input.positionOS, input.uv1.xy, input.uv2.xy, unity_LightmapST, unity_DynamicLightmapST);
@@ -798,12 +804,13 @@ Shader "Nihit/GlassURP"
 #if defined(VARYINGS_NEED_TEXCOORD0) || defined(VARYINGS_DS_NEED_TEXCOORD0)
                 output.texCoord0 = input.uv0;
 #endif
-#ifdef EDITOR_VISUALIZATION
-                float2 VizUV = 0;
-                float4 LightCoord = 0;
-                UnityEditorVizData(input.positionOS, input.uv0, input.uv1, input.uv2, VizUV, LightCoord);
-#endif
+//#ifdef EDITOR_VISUALIZATION
+                //float2 VizUV = 0;
+                //float4 LightCoord = 0;
+                //UnityEditorVizData(input.positionOS, input.uv0, input.uv1, input.uv2, VizUV, LightCoord);
+//#endif
 
+/*
 #if defined(VARYINGS_NEED_TEXCOORD1) || defined(VARYINGS_DS_NEED_TEXCOORD1)
     #ifdef EDITOR_VISUALIZATION
                 output.texCoord1 = float4(VizUV, 0, 0);
@@ -811,7 +818,9 @@ Shader "Nihit/GlassURP"
                 output.texCoord1 = input.uv1;
     #endif
 #endif
+*/
 
+/*
 #if defined(VARYINGS_NEED_TEXCOORD2) || defined(VARYINGS_DS_NEED_TEXCOORD2)
     #ifdef EDITOR_VISUALIZATION
                 output.texCoord2 = LightCoord;
@@ -819,27 +828,35 @@ Shader "Nihit/GlassURP"
                 output.texCoord2 = input.uv2;
     #endif
 #endif
+*/
 
+/*
 #if defined(VARYINGS_NEED_TEXCOORD3) || defined(VARYINGS_DS_NEED_TEXCOORD3)
                 output.texCoord3 = input.uv3;
 #endif
+*/
 
+/*
 #if defined(VARYINGS_NEED_COLOR) || defined(VARYINGS_DS_NEED_COLOR)
                 output.color = input.color;
 #endif
+*/
 
+/*
 #ifdef VARYINGS_NEED_SCREENPOSITION
                 output.screenPosition = vertexInput.positionNDC;
 #endif
+*/
 
 #if (SHADERPASS == SHADERPASS_FORWARD) || (SHADERPASS == SHADERPASS_GBUFFER)
                 OUTPUT_LIGHTMAP_UV(input.uv1, unity_LightmapST, output.staticLightmapUV);
-    #if defined(DYNAMICLIGHTMAP_ON)
-                output.dynamicLightmapUV.xy = input.uv2.xy * unity_DynamicLightmapST.xy + unity_DynamicLightmapST.zw;
-    #endif
+    //#if defined(DYNAMICLIGHTMAP_ON)
+                //output.dynamicLightmapUV.xy = input.uv2.xy * unity_DynamicLightmapST.xy + unity_DynamicLightmapST.zw;
+    //#endif
                 OUTPUT_SH(normalWS, output.sh);
 #endif
 
+/*
 #ifdef VARYINGS_NEED_FOG_AND_VERTEX_LIGHT
                 half fogFactor = 0;
     #if !defined(_FOG_FRAGMENT)
@@ -848,10 +865,11 @@ Shader "Nihit/GlassURP"
                 half3 vertexLight = VertexLighting(positionWS, normalWS);
                 output.fogFactorAndVertexLight = half4(fogFactor, vertexLight);
 #endif
+*/
 
-#if defined(VARYINGS_NEED_SHADOW_COORD) && defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
-                output.shadowCoord = GetShadowCoord(vertexInput);
-#endif
+//#if defined(VARYINGS_NEED_SHADOW_COORD) && defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
+                //output.shadowCoord = GetShadowCoord(vertexInput);
+//#endif
 
                 return output;
             }
@@ -859,14 +877,15 @@ Shader "Nihit/GlassURP"
             SurfaceDescription BuildSurfaceDescription(Varyings varyings)
             {
                 SurfaceDescriptionInputs surfaceDescriptionInputs = BuildSurfaceDescriptionInputs(varyings);
-#if defined(HAVE_VFX_MODIFICATION)
-                GraphProperties properties;
-                ZERO_INITIALIZE(GraphProperties, properties);
-                GetElementPixelProperties(surfaceDescriptionInputs, properties);
-                SurfaceDescription surfaceDescription = SurfaceDescriptionFunction(surfaceDescriptionInputs, properties);
-#else
+
+//#if defined(HAVE_VFX_MODIFICATION)
+                //GraphProperties properties;
+                //ZERO_INITIALIZE(GraphProperties, properties);
+                //GetElementPixelProperties(surfaceDescriptionInputs, properties);
+                //SurfaceDescription surfaceDescription = SurfaceDescriptionFunction(surfaceDescriptionInputs, properties);
+//#else
                 SurfaceDescription surfaceDescription = SurfaceDescriptionFunction(surfaceDescriptionInputs);
-#endif
+//#endif
                 return surfaceDescription;
             }
 
@@ -895,27 +914,30 @@ Shader "Nihit/GlassURP"
 #else
                     inputData.normalWS = input.normalWS;
 #endif
+
                 inputData.normalWS = NormalizeNormalPerPixel(inputData.normalWS);
                 inputData.viewDirectionWS = GetWorldSpaceNormalizeViewDir(input.positionWS);
 
-#if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
-                    inputData.shadowCoord = input.shadowCoord;
-#elif defined(MAIN_LIGHT_CALCULATE_SHADOWS)
-                    inputData.shadowCoord = TransformWorldToShadowCoord(inputData.positionWS);
-#else
+//#if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
+                    //inputData.shadowCoord = input.shadowCoord;
+//#elif defined(MAIN_LIGHT_CALCULATE_SHADOWS)
+                    //inputData.shadowCoord = TransformWorldToShadowCoord(inputData.positionWS);
+//#else
                     inputData.shadowCoord = float4(0, 0, 0, 0);
-#endif
+//#endif
 
                 inputData.fogCoord = InitializeInputDataFog(float4(input.positionWS, 1.0), input.fogFactorAndVertexLight.x);
                 inputData.vertexLighting = input.fogFactorAndVertexLight.yzw;
-#if defined(DYNAMICLIGHTMAP_ON)
-                inputData.bakedGI = SAMPLE_GI(input.staticLightmapUV, input.dynamicLightmapUV.xy, input.sh, inputData.normalWS);
-#else
+
+//#if defined(DYNAMICLIGHTMAP_ON)
+                //inputData.bakedGI = SAMPLE_GI(input.staticLightmapUV, input.dynamicLightmapUV.xy, input.sh, inputData.normalWS);
+//#else
                 inputData.bakedGI = SAMPLE_GI(input.staticLightmapUV, input.sh, inputData.normalWS);
-#endif
+//#endif
                 inputData.normalizedScreenSpaceUV = GetNormalizedScreenSpaceUV(input.positionCS);
                 inputData.shadowMask = SAMPLE_SHADOWMASK(input.staticLightmapUV);
 
+/*
 #if defined(DEBUG_DISPLAY)
     #if defined(DYNAMICLIGHTMAP_ON)
                 inputData.dynamicLightmapUV = input.dynamicLightmapUV.xy;
@@ -926,6 +948,7 @@ Shader "Nihit/GlassURP"
                 inputData.vertexSH = input.sh;
     #endif
 #endif
+*/
             }
 
             PackedVaryings vert(Attributes input)
@@ -940,9 +963,9 @@ Shader "Nihit/GlassURP"
             void frag(
                 PackedVaryings packedInput
                 , out half4 outColor : SV_Target0
-            #ifdef _WRITE_RENDERING_LAYERS
-                , out float4 outRenderingLayers : SV_Target1
-            #endif
+//#ifdef _WRITE_RENDERING_LAYERS
+                //, out float4 outRenderingLayers : SV_Target1
+//#endif
             )
             {
                 Varyings unpacked = UnpackVaryings(packedInput);
@@ -950,40 +973,38 @@ Shader "Nihit/GlassURP"
                 UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(unpacked);
                 SurfaceDescription surfaceDescription = BuildSurfaceDescription(unpacked);
 
-#if defined(_SURFACE_TYPE_TRANSPARENT)
-                bool isTransparent = true;
-#else
+//#if defined(_SURFACE_TYPE_TRANSPARENT)
+                //bool isTransparent = true;
+//#else
                 bool isTransparent = false;
-#endif
+//#endif
 
-#if defined(_ALPHATEST_ON)
-                half alpha = AlphaDiscard(surfaceDescription.Alpha, surfaceDescription.AlphaClipThreshold);
-#elif defined(_SURFACE_TYPE_TRANSPARENT)
-                half alpha = surfaceDescription.Alpha;
-#else
+//#if defined(_ALPHATEST_ON)
+                //half alpha = AlphaDiscard(surfaceDescription.Alpha, surfaceDescription.AlphaClipThreshold);
+//#elif defined(_SURFACE_TYPE_TRANSPARENT)
+                //half alpha = surfaceDescription.Alpha;
+//#else
                 half alpha = half(1.0);
-#endif
+//#endif
 
-#if defined(LOD_FADE_CROSSFADE) && USE_UNITY_CROSSFADE
-                    LODFadeCrossFade(unpacked.positionCS);
-#endif
+//#if defined(LOD_FADE_CROSSFADE) && USE_UNITY_CROSSFADE
+                //LODFadeCrossFade(unpacked.positionCS);
+//#endif
 
                 InputData inputData;
                 InitializeInputData(unpacked, surfaceDescription, inputData);
-                // TODO: Mip debug modes would require this, open question how to do this on ShaderGraph.
-                //SETUP_DEBUG_TEXTURE_DATA(inputData, unpacked.texCoord1.xy, _MainTex);
 
-#ifdef _SPECULAR_SETUP
-                    float3 specular = surfaceDescription.Specular;
-                    float metallic = 1;
-#else
-                    float3 specular = 0;
-                    float metallic = surfaceDescription.Metallic;
-#endif
+//#ifdef _SPECULAR_SETUP
+                //float3 specular = surfaceDescription.Specular;
+                //float metallic = 1;
+//#else
+                float3 specular = 0;
+                float metallic = surfaceDescription.Metallic;
+//#endif
 
                 half3 normalTS = half3(0, 0, 0);
 #if defined(_NORMALMAP) && defined(_NORMAL_DROPOFF_TS)
-                    normalTS = surfaceDescription.NormalTS;
+                normalTS = surfaceDescription.NormalTS;
 #endif
 
                 SurfaceData surface;
@@ -998,16 +1019,16 @@ Shader "Nihit/GlassURP"
                 surface.clearCoatMask       = 0;
                 surface.clearCoatSmoothness = 1;
 
-#ifdef _CLEARCOAT
-                    surface.clearCoatMask       = saturate(surfaceDescription.CoatMask);
-                    surface.clearCoatSmoothness = saturate(surfaceDescription.CoatSmoothness);
-#endif
+//#ifdef _CLEARCOAT
+                //surface.clearCoatMask       = saturate(surfaceDescription.CoatMask);
+                //surface.clearCoatSmoothness = saturate(surfaceDescription.CoatSmoothness);
+//#endif
 
                 surface.albedo = AlphaModulate(surface.albedo, surface.alpha);
 
-#ifdef _DBUFFER
-                ApplyDecalToSurfaceData(unpacked.positionCS, surface, inputData);
-#endif
+//#ifdef _DBUFFER
+                //ApplyDecalToSurfaceData(unpacked.positionCS, surface, inputData);
+//#endif
 
                 half4 color = UniversalFragmentPBR(inputData, surface);
                 color.rgb = MixFog(color.rgb, inputData.fogCoord);
@@ -1016,19 +1037,19 @@ Shader "Nihit/GlassURP"
 
                 outColor = color;
 
-#ifdef _WRITE_RENDERING_LAYERS
-                uint renderingLayers = GetMeshRenderingLayer();
-                outRenderingLayers = float4(EncodeMeshRenderingLayer(renderingLayers), 0, 0, 0);
-#endif
+//#ifdef _WRITE_RENDERING_LAYERS
+                //uint renderingLayers = GetMeshRenderingLayer();
+                //outRenderingLayers = float4(EncodeMeshRenderingLayer(renderingLayers), 0, 0, 0);
+//#endif
             }
 
 
 
             // --------------------------------------------------
             // Visual Effect Vertex Invocations
-#ifdef HAVE_VFX_MODIFICATION
-            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/VisualEffectVertex.hlsl"
-#endif
+//#ifdef HAVE_VFX_MODIFICATION
+            //#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/VisualEffectVertex.hlsl"
+//#endif
 
             ENDHLSL
         }
