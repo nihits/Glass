@@ -104,13 +104,12 @@ Shader "Nihit/GlassURP"
             struct Varyings
             {
                 float4 positionCS : SV_POSITION;
-                float3 positionWS;
-                float3 normalWS;
-                float4 tangentWS;
-                float4 texCoord0;
-                float3 sh;
-                float4 fogFactorAndVertexLight;
-
+                float3 positionWS : TEXCOORD0;
+                float3 normalWS : TEXCOORD1;
+                float4 tangentWS : TEXCOORD2;
+                float4 texCoord0 : TEXCOORD3;
+                float3 sh : TEXCOORD4;
+                float4 fogFactorAndVertexLight : TEXCOORD5;
             };
 
             Varyings BuildVaryings(Attributes input)
@@ -177,60 +176,16 @@ Shader "Nihit/GlassURP"
                 return output;
             }
 
-            struct PackedVaryings
-            {
-                float4 positionCS : SV_POSITION;
-                float3 sh : INTERP2;
-                float4 tangentWS : INTERP4;
-                float4 texCoord0 : INTERP5;
-                float4 fogFactorAndVertexLight : INTERP6;
-                float3 positionWS : INTERP7;
-                float3 normalWS : INTERP8;
-
-            };
-
-            PackedVaryings PackVaryings (Varyings input)
-            {
-                PackedVaryings output;
-                ZERO_INITIALIZE(PackedVaryings, output);
-
-                output.positionCS = input.positionCS;
-                output.sh = input.sh;
-                output.tangentWS.xyzw = input.tangentWS;
-                output.texCoord0.xyzw = input.texCoord0;
-                output.fogFactorAndVertexLight.xyzw = input.fogFactorAndVertexLight;
-                output.positionWS.xyz = input.positionWS;
-                output.normalWS.xyz = input.normalWS;
-
-                return output;
-            }
-
-            PackedVaryings vert(Attributes input)
+            Varyings vert(Attributes input)
             {
                 Varyings output = (Varyings)0;
                 output = BuildVaryings(input);
-                PackedVaryings packedOutput = (PackedVaryings)0;
-                packedOutput = PackVaryings(output);
-                return packedOutput;
+                return output;
             }
 
             ////////////////////////////////////////////////////////////////////
 
             // Frag
-
-            Varyings UnpackVaryings (PackedVaryings input)
-            {
-                Varyings output;
-                output.positionCS = input.positionCS;
-                output.sh = input.sh;
-                output.tangentWS = input.tangentWS.xyzw;
-                output.texCoord0 = input.texCoord0.xyzw;
-                output.fogFactorAndVertexLight = input.fogFactorAndVertexLight.xyzw;
-                output.positionWS = input.positionWS.xyz;
-                output.normalWS = input.normalWS.xyz;
-
-                return output;
-            }
 
             struct SurfaceDescriptionInputs
             {
@@ -509,18 +464,17 @@ Shader "Nihit/GlassURP"
 
             }
 
-            half4 frag(PackedVaryings packedInput) : SV_Target
+            half4 frag(Varyings input) : SV_Target
             {
-                Varyings unpacked = UnpackVaryings(packedInput);
-                UNITY_SETUP_INSTANCE_ID(unpacked);
-                UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(unpacked);
-                SurfaceDescription surfaceDescription = BuildSurfaceDescription(unpacked);
+                UNITY_SETUP_INSTANCE_ID(input);
+                UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
+                SurfaceDescription surfaceDescription = BuildSurfaceDescription(input);
 
                 bool isTransparent = false;
                 half alpha = half(1.0);
 
                 InputData inputData;
-                InitializeInputData(unpacked, surfaceDescription, inputData);
+                InitializeInputData(input, surfaceDescription, inputData);
 
                 float3 specular = 0;
                 float metallic = surfaceDescription.Metallic;
