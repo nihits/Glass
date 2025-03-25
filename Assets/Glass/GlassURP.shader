@@ -108,11 +108,7 @@ Shader "Nihit/GlassURP"
                 float3 normalWS;
                 float4 tangentWS;
                 float4 texCoord0;
-
-#if !defined(LIGHTMAP_ON)
                 float3 sh;
-#endif
-
                 float4 fogFactorAndVertexLight;
 
             };
@@ -184,11 +180,7 @@ Shader "Nihit/GlassURP"
             struct PackedVaryings
             {
                 float4 positionCS : SV_POSITION;
-
-#if !defined(LIGHTMAP_ON)
                 float3 sh : INTERP2;
-#endif
-
                 float4 tangentWS : INTERP4;
                 float4 texCoord0 : INTERP5;
                 float4 fogFactorAndVertexLight : INTERP6;
@@ -203,11 +195,7 @@ Shader "Nihit/GlassURP"
                 ZERO_INITIALIZE(PackedVaryings, output);
 
                 output.positionCS = input.positionCS;
-
-#if !defined(LIGHTMAP_ON)
                 output.sh = input.sh;
-#endif
-
                 output.tangentWS.xyzw = input.tangentWS;
                 output.texCoord0.xyzw = input.texCoord0;
                 output.fogFactorAndVertexLight.xyzw = input.fogFactorAndVertexLight;
@@ -234,11 +222,7 @@ Shader "Nihit/GlassURP"
             {
                 Varyings output;
                 output.positionCS = input.positionCS;
-
-#if !defined(LIGHTMAP_ON)
                 output.sh = input.sh;
-#endif
-
                 output.tangentWS = input.tangentWS.xyzw;
                 output.texCoord0 = input.texCoord0.xyzw;
                 output.fogFactorAndVertexLight = input.fogFactorAndVertexLight.xyzw;
