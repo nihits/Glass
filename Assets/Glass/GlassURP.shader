@@ -101,41 +101,6 @@ Shader "Nihit/GlassURP"
                 float4 uv2 : TEXCOORD2;
             };
 
-            struct VertexDescriptionInputs
-            {
-                float3 ObjectSpaceNormal;
-                float3 ObjectSpaceTangent;
-                float3 ObjectSpacePosition;
-            };
-
-            VertexDescriptionInputs BuildVertexDescriptionInputs(Attributes input)
-            {
-                VertexDescriptionInputs output;
-                ZERO_INITIALIZE(VertexDescriptionInputs, output);
-
-                output.ObjectSpaceNormal = input.normalOS;
-                output.ObjectSpaceTangent = input.tangentOS.xyz;
-                output.ObjectSpacePosition = input.positionOS;
-
-                return output;
-            }
-
-            struct VertexDescription
-            {
-                float3 Position;
-                float3 Normal;
-                float3 Tangent;
-            };
-
-            VertexDescription VertexDescriptionFunction(VertexDescriptionInputs IN)
-            {
-                VertexDescription description = (VertexDescription)0;
-                description.Position = IN.ObjectSpacePosition;
-                description.Normal = IN.ObjectSpaceNormal;
-                description.Tangent = IN.ObjectSpaceTangent;
-                return description;
-            }
-
             struct Varyings
             {
                 float4 positionCS : SV_POSITION;
