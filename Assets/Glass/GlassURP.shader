@@ -112,39 +112,23 @@ Shader "Nihit/GlassURP"
                 float4 fogFactorAndVertexLight : TEXCOORD5;
             };
 
-            Varyings BuildVaryings(Attributes input)
+            Varyings vert(Attributes input)
             {
                 Varyings output = (Varyings)0;
 
                 UNITY_SETUP_INSTANCE_ID(input);
-
                 UNITY_TRANSFER_INSTANCE_ID(input, output);
-
                 UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
 
                 VertexPositionInputs vertexInput = GetVertexPositionInputs(input.positionOS.xyz);
 
                 float3 positionWS = TransformObjectToWorld(input.positionOS);
-
-#ifdef ATTRIBUTES_NEED_NORMAL
                 float3 normalWS = TransformObjectToWorldNormal(input.normalOS);
-#endif
-
-#ifdef ATTRIBUTES_NEED_TANGENT
                 float4 tangentWS = float4(TransformObjectToWorldDir(input.tangentOS.xyz), input.tangentOS.w);
-#endif
 
-#ifdef VARYINGS_NEED_POSITION_WS
                 output.positionWS = positionWS;
-#endif
-
-#ifdef VARYINGS_NEED_NORMAL_WS
                 output.normalWS = normalWS;
-#endif
-
-#ifdef VARYINGS_NEED_TANGENT_WS
                 output.tangentWS = tangentWS;
-#endif
 
 #if (SHADERPASS == SHADERPASS_SHADOWCASTER)
     #if _CASTING_PUNCTUAL_LIGHT_SHADOW
@@ -164,22 +148,13 @@ Shader "Nihit/GlassURP"
                 output.positionCS = TransformWorldToHClip(positionWS);
 #endif
 
-#if defined(VARYINGS_NEED_TEXCOORD0) || defined(VARYINGS_DS_NEED_TEXCOORD0)
                 output.texCoord0 = input.uv0;
-#endif
 
 #if (SHADERPASS == SHADERPASS_FORWARD) || (SHADERPASS == SHADERPASS_GBUFFER)
                 OUTPUT_LIGHTMAP_UV(input.uv1, unity_LightmapST, output.staticLightmapUV);
                 OUTPUT_SH(normalWS, output.sh);
 #endif
 
-                return output;
-            }
-
-            Varyings vert(Attributes input)
-            {
-                Varyings output = (Varyings)0;
-                output = BuildVaryings(input);
                 return output;
             }
 
@@ -208,7 +183,7 @@ Shader "Nihit/GlassURP"
                 float3 unnormalizedNormalWS = input.normalWS;
                 const float renormFactor = 1.0 / length(unnormalizedNormalWS);
 
-                float crossSign = (input.tangentWS.w > 0.0 ? 1.0 : -1.0)* GetOddNegativeScale();
+                float crossSign = (input.tangentWS.w > 0.0 ? 1.0 : -1.0) * GetOddNegativeScale();
                 float3 bitang = crossSign * cross(input.normalWS.xyz, input.tangentWS.xyz);
 
                 output.WorldSpaceNormal = renormFactor * input.normalWS.xyz;
@@ -440,10 +415,6 @@ Shader "Nihit/GlassURP"
                 inputData.tangentToWorld = half3x3(input.tangentWS.xyz, bitangent.xyz, input.normalWS.xyz);
     #if _NORMAL_DROPOFF_TS
                 inputData.normalWS = TransformTangentToWorld(surfaceDescription.NormalTS, inputData.tangentToWorld);
-    #elif _NORMAL_DROPOFF_OS
-                inputData.normalWS = TransformObjectToWorldNormal(surfaceDescription.NormalOS);
-    #elif _NORMAL_DROPOFF_WS
-                inputData.normalWS = surfaceDescription.NormalWS;
     #endif
 #else
                 inputData.normalWS = input.normalWS;
