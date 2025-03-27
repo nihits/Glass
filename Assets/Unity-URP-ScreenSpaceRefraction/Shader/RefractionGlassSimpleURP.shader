@@ -6,11 +6,11 @@ Shader "Nihit/RefractionGlassSimpleURP"
         _Chromatic("Chromatic", Range(0, 0.2)) = 0
         _ColorTint("ColorTint", Color) = (1, 1, 1, 0)
         [ToggleUI]_UseEmissive("UseEmissive", Float) = 0
-        [HideInInspector]_QueueOffset("_QueueOffset", Float) = 0
-        [HideInInspector]_QueueControl("_QueueControl", Float) = -1
-        [HideInInspector][NoScaleOffset]unity_Lightmaps("unity_Lightmaps", 2DArray) = "" {}
-        [HideInInspector][NoScaleOffset]unity_LightmapsInd("unity_LightmapsInd", 2DArray) = "" {}
-        [HideInInspector][NoScaleOffset]unity_ShadowMasks("unity_ShadowMasks", 2DArray) = "" {}
+        _QueueOffset("_QueueOffset", Float) = 0
+        _QueueControl("_QueueControl", Float) = -1
+        [NoScaleOffset]unity_Lightmaps("unity_Lightmaps", 2DArray) = "" {}
+        [NoScaleOffset]unity_LightmapsInd("unity_LightmapsInd", 2DArray) = "" {}
+        [NoScaleOffset]unity_ShadowMasks("unity_ShadowMasks", 2DArray) = "" {}
     }
     SubShader
     {

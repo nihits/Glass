@@ -12,11 +12,11 @@ Shader "Nihit/RefractionGlassComplexURP"
         [NoScaleOffset]_Emissive("Emissive", 2D) = "white" {}
         _EmissiveStrenght("EmissiveStrenght", Range(0, 10)) = 1
         [NoScaleOffset]_Rughness("Rughness", 2D) = "white" {}
-        [HideInInspector]_QueueOffset("_QueueOffset", Float) = 0
-        [HideInInspector]_QueueControl("_QueueControl", Float) = -1
-        [HideInInspector][NoScaleOffset]unity_Lightmaps("unity_Lightmaps", 2DArray) = "" {}
-        [HideInInspector][NoScaleOffset]unity_LightmapsInd("unity_LightmapsInd", 2DArray) = "" {}
-        [HideInInspector][NoScaleOffset]unity_ShadowMasks("unity_ShadowMasks", 2DArray) = "" {}
+        _QueueOffset("_QueueOffset", Float) = 0
+        _QueueControl("_QueueControl", Float) = -1
+        [NoScaleOffset]unity_Lightmaps("unity_Lightmaps", 2DArray) = "" {}
+        [NoScaleOffset]unity_LightmapsInd("unity_LightmapsInd", 2DArray) = "" {}
+        [NoScaleOffset]unity_ShadowMasks("unity_ShadowMasks", 2DArray) = "" {}
     }
         SubShader
         {
