@@ -358,50 +358,29 @@ Shader "Nihit/RefractionGlassSimpleURP"
                 {
                     Out = SHADERGRAPH_SAMPLE_SCENE_COLOR(UV.xy);
                 }
-                
-                struct Bindings_RefractionFunction_9_float
+
+                float4 Refract(float _Refractive_Index_Target, float _Refractive_Index_Origin, float _UseNormalMap, float3 _NormalMap, float3 WorldSpaceNormal, float3 AbsoluteWorldSpacePosition)
                 {
-                float3 WorldSpaceNormal;
-                float3 AbsoluteWorldSpacePosition;
-                };
-                
-                void SG_RefractionFunction_9_float(float _Refractive_Index_Target, float _Refractive_Index_Origin, float _UseNormalMap, float3 _NormalMap, Bindings_RefractionFunction_9_float IN, out float4 OutVector4_1)
-                {
-                    float _Property_d_Out_0_Boolean = _UseNormalMap;
-                    float3 _Property_1_Out_0_Vector3 = _NormalMap;
-                    float3 _NormalBlend_b_Out_2_Vector3;
-                    Unity_NormalBlend_float(IN.WorldSpaceNormal, _Property_1_Out_0_Vector3, _NormalBlend_b_Out_2_Vector3);
-                    float3 _Branch_8_Out_3_Vector3;
-                    Unity_Branch_float3(_Property_d_Out_0_Boolean, _NormalBlend_b_Out_2_Vector3, IN.WorldSpaceNormal, _Branch_8_Out_3_Vector3);
-                    float _Property_b_Out_0_Float = _Refractive_Index_Origin;
-                    float _Property_0_Out_0_Float = _Refractive_Index_Target;
-                    float _Divide_a_Out_2_Float;
-                    Unity_Divide_float(_Property_b_Out_0_Float, _Property_0_Out_0_Float, _Divide_a_Out_2_Float);
-                    float3 _RefractionMethodCustomFunction_b_Out_0_Vector3;
-                    RefractionMethod_float((-1 * mul((float3x3)UNITY_MATRIX_M, transpose(mul(UNITY_MATRIX_I_M, UNITY_MATRIX_I_V)) [2].xyz)), _Branch_8_Out_3_Vector3, _Divide_a_Out_2_Float, _RefractionMethodCustomFunction_b_Out_0_Vector3);
-                    float3 _Normalize_3_Out_1_Vector3;
-                    Unity_Normalize_float3(_RefractionMethodCustomFunction_b_Out_0_Vector3, _Normalize_3_Out_1_Vector3);
-                    float3 _Add_4_Out_2_Vector3;
-                    Unity_Add_float3(IN.AbsoluteWorldSpacePosition, _Normalize_3_Out_1_Vector3, _Add_4_Out_2_Vector3);
-                    float _Split_e_R_1_Float = _Add_4_Out_2_Vector3[0];
-                    float _Split_e_G_2_Float = _Add_4_Out_2_Vector3[1];
-                    float _Split_e_B_3_Float = _Add_4_Out_2_Vector3[2];
-                    float _Split_e_A_4_Float = 0;
-                    float4 _Vector4_a_Out_0_Vector4 = float4(_Split_e_R_1_Float, _Split_e_G_2_Float, _Split_e_B_3_Float, float(1));
-                    float4 _Multiply_d_Out_2_Vector4;
-                    Unity_Multiply_float4x4_float4(UNITY_MATRIX_VP, _Vector4_a_Out_0_Vector4, _Multiply_d_Out_2_Vector4);
-                    float4 _screenposCustomFunction_6_Out_1_Vector4;
-                    screenpos_float(_Multiply_d_Out_2_Vector4, _screenposCustomFunction_6_Out_1_Vector4);
-                    float _Split_9_R_1_Float = _screenposCustomFunction_6_Out_1_Vector4[0];
-                    float _Split_9_G_2_Float = _screenposCustomFunction_6_Out_1_Vector4[1];
-                    float _Split_9_B_3_Float = _screenposCustomFunction_6_Out_1_Vector4[2];
-                    float _Split_9_A_4_Float = _screenposCustomFunction_6_Out_1_Vector4[3];
-                    float2 _Vector2_d_Out_0_Vector2 = float2(_Split_9_R_1_Float, _Split_9_G_2_Float);
-                    float2 _Divide_5_Out_2_Vector2;
-                    Unity_Divide_float2(_Vector2_d_Out_0_Vector2, (_Split_9_A_4_Float.xx), _Divide_5_Out_2_Vector2);
-                    float3 _SceneColor_1_Out_1_Vector3;
-                    Unity_SceneColor_float((float4(_Divide_5_Out_2_Vector2, 0.0, 1.0)), _SceneColor_1_Out_1_Vector3);
-                    OutVector4_1 = (float4(_SceneColor_1_Out_1_Vector3, 1.0));
+                    float3 normalBlend = SafeNormalize(float3(WorldSpaceNormal.rg + _NormalMap.rg, WorldSpaceNormal.b * _NormalMap.b));
+                    float3 finalNormal = _UseNormalMap ? normalBlend : WorldSpaceNormal;
+
+                    float ETA = _Refractive_Index_Origin / _Refractive_Index_Target;
+
+                    float3 refractedVector = refract(
+                        normalize(-1 * mul((float3x3)UNITY_MATRIX_M, transpose(mul(UNITY_MATRIX_I_M, UNITY_MATRIX_I_V)) [2].xyz)),
+                        normalize(finalNormal),
+                        ETA);
+
+                    float3 positionRefracted = AbsoluteWorldSpacePosition + normalize(refractedVector);
+
+                    float4 positionRefractedProjected = mul(UNITY_MATRIX_VP, float4(positionRefracted, 1.0));
+
+                    float4 screenPos = ComputeScreenPos(positionRefractedProjected,_ProjectionParams.x);
+
+                    float2 sceneUV = screenPos.xy / screenPos.ww;
+                    float3 refractedColor = SampleSceneColor(sceneUV);
+
+                    return float4(refractedColor, 1.0);
                 }
                 
                 void Unity_Add_float(float A, float B, out float Out)
@@ -463,48 +442,24 @@ Shader "Nihit/RefractionGlassSimpleURP"
                 SurfaceDescription SurfaceDescriptionFunction(SurfaceDescriptionInputs IN)
                 {
                     SurfaceDescription surface = (SurfaceDescription)0;
-                    float4 _Property_b_Out_0_Vector4 = _ColorTint;
-                    float _Property_7_Out_0_Float = _IOR;
-                    float Boolean_b = 0;
-                    Bindings_RefractionFunction_9_float _RefractionFunction_2;
-                    _RefractionFunction_2.WorldSpaceNormal = IN.WorldSpaceNormal;
-                    _RefractionFunction_2.AbsoluteWorldSpacePosition = IN.AbsoluteWorldSpacePosition;
-                    float4 _RefractionFunction_2_OutVector4_1_Vector4;
-                    SG_RefractionFunction_9_float(_Property_7_Out_0_Float, float(1), Boolean_b, float3 (0, 0, 0), _RefractionFunction_2, _RefractionFunction_2_OutVector4_1_Vector4);
-                    float _Swizzle_5_Out_1_Float = _RefractionFunction_2_OutVector4_1_Vector4.x;
-                    float _Property_b_Out_0_Float = _Chromatic;
-                    float _Add_0_Out_2_Float;
-                    Unity_Add_float(_Property_7_Out_0_Float, _Property_b_Out_0_Float, _Add_0_Out_2_Float);
-                    Bindings_RefractionFunction_9_float _RefractionFunction_c;
-                    _RefractionFunction_c.WorldSpaceNormal = IN.WorldSpaceNormal;
-                    _RefractionFunction_c.AbsoluteWorldSpacePosition = IN.AbsoluteWorldSpacePosition;
-                    float4 _RefractionFunction_c_OutVector4_1_Vector4;
-                    SG_RefractionFunction_9_float(_Add_0_Out_2_Float, float(1), Boolean_b, float3 (0, 0, 0), _RefractionFunction_c, _RefractionFunction_c_OutVector4_1_Vector4);
-                    float _Swizzle_4_Out_1_Float = _RefractionFunction_c_OutVector4_1_Vector4.y;
-                    float _Property_c_Out_0_Float = _Chromatic;
-                    float _Multiply_7_Out_2_Float;
-                    Unity_Multiply_float_float(_Property_c_Out_0_Float, 2, _Multiply_7_Out_2_Float);
-                    float _Add_3_Out_2_Float;
-                    Unity_Add_float(_Property_7_Out_0_Float, _Multiply_7_Out_2_Float, _Add_3_Out_2_Float);
-                    Bindings_RefractionFunction_9_float _RefractionFunction_a;
-                    _RefractionFunction_a.WorldSpaceNormal = IN.WorldSpaceNormal;
-                    _RefractionFunction_a.AbsoluteWorldSpacePosition = IN.AbsoluteWorldSpacePosition;
-                    float4 _RefractionFunction_a_OutVector4_1_Vector4;
-                    SG_RefractionFunction_9_float(_Add_3_Out_2_Float, float(1), Boolean_b, float3 (0, 0, 0), _RefractionFunction_a, _RefractionFunction_a_OutVector4_1_Vector4);
-                    float _Swizzle_2_Out_1_Float = _RefractionFunction_a_OutVector4_1_Vector4.z;
-                    float3 _Vector3_8_Out_0_Vector3 = float3(_Swizzle_5_Out_1_Float, _Swizzle_4_Out_1_Float, _Swizzle_2_Out_1_Float);
-                    float3 _Multiply_c_Out_2_Vector3;
-                    Unity_Multiply_float3_float3((_Property_b_Out_0_Vector4.xyz), _Vector3_8_Out_0_Vector3, _Multiply_c_Out_2_Vector3);
-                    float _Property_e_Out_0_Boolean = _UseEmissive;
-                    float3 _Branch_5_Out_3_Vector3;
-                    Unity_Branch_float3(_Property_e_Out_0_Boolean, _Multiply_c_Out_2_Vector3, float3(0, 0, 0), _Branch_5_Out_3_Vector3);
-                    surface.BaseColor = _Multiply_c_Out_2_Vector3;
+
+                    float4 refractedColorChromatic0 = Refract(_IOR, 1.0, 0.0, float3 (0, 0, 0), IN.WorldSpaceNormal, IN.AbsoluteWorldSpacePosition);
+                    float4 refractedColorChromatic1 = Refract(_IOR + _Chromatic, 1.0, 0.0, float3 (0, 0, 0), IN.WorldSpaceNormal, IN.AbsoluteWorldSpacePosition);
+                    float4 refractedColorChromatic2 = Refract(_IOR + _Chromatic * 2.0, 1.0, 0.0, float3 (0, 0, 0), IN.WorldSpaceNormal, IN.AbsoluteWorldSpacePosition);
+
+                    float3 refractedColorChromatic = float3(refractedColorChromatic0.r, refractedColorChromatic1.g, refractedColorChromatic2.b);
+
+                    float3 refractedColorChromaticTinted = _ColorTint.xyz * refractedColorChromatic;
+                    float3 refractedColorChromaticTintedEmissive = _UseEmissive ? refractedColorChromaticTinted : float3(0, 0, 0);
+
+                    surface.BaseColor = refractedColorChromaticTinted;
                     surface.NormalTS = IN.TangentSpaceNormal;
-                    surface.Emission = _Branch_5_Out_3_Vector3;
+                    surface.Emission = refractedColorChromaticTintedEmissive;
                     surface.Metallic = float(0);
                     surface.Smoothness = float(0.5);
                     surface.Occlusion = float(1);
                     surface.Alpha = float(1);
+
                     return surface;
                 }
             
