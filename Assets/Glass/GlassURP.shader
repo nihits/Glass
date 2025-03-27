@@ -2,6 +2,9 @@ Shader "Nihit/GlassURP"
 {
     Properties
     {
+        _IOR("IOR", Range(1, 5)) = 1.52
+        _ChromaticAberration("ChromaticAberration", Range(0, 0.2)) = 0
+        [ToggleUI]_UseEmissive("UseEmissive", Float) = 0
         _TintTexture("TintTexture", 2D) = "white" {}
         _TintTextureDistortion("TintTextureDistortion", Range(0, 1)) = 0
         _TintColor("TintColor", Color) = (0, 1, 0.8042793, 0)
@@ -63,8 +66,12 @@ Shader "Nihit/GlassURP"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Input.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareOpaqueTexture.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/ShaderVariablesFunctions.deprecated.hlsl"
 
             CBUFFER_START(UnityPerMaterial)
+                float _IOR;
+                float _ChromaticAberration;
+                float _UseEmissive;
                 float _DisortStrength;
                 float _NormalStrength;
                 float4 _TintColor;
@@ -162,6 +169,7 @@ Shader "Nihit/GlassURP"
                 float3 WorldSpaceBiTangent;
                 float3 WorldSpaceViewDirection;
                 float3 WorldSpacePosition;
+                float3 AbsoluteWorldSpacePosition;
                 float2 NDCPosition;
                 float2 PixelPosition;
                 float4 uv0;
@@ -186,6 +194,8 @@ Shader "Nihit/GlassURP"
 
                 output.WorldSpaceViewDirection = GetWorldSpaceNormalizeViewDir(input.positionWS);
                 output.WorldSpacePosition = input.positionWS;
+
+                output.AbsoluteWorldSpacePosition = GetAbsolutePositionWS(input.positionWS);
 
 #if UNITY_UV_STARTS_AT_TOP
                 output.PixelPosition = float2(input.positionCS.x, (_ProjectionParams.x < 0) ? (_ScaledScreenParams.y - input.positionCS.y) : input.positionCS.y);
@@ -279,6 +289,29 @@ Shader "Nihit/GlassURP"
                 return Out;
             }
 
+            float2 RefractUV(float _Refractive_Index_Target, float _Refractive_Index_Origin, float _UseNormalMap, float3 _NormalMap, float3 WorldSpaceNormal, float3 AbsoluteWorldSpacePosition)
+            {
+                float3 normalBlend = SafeNormalize(float3(WorldSpaceNormal.rg + _NormalMap.rg, WorldSpaceNormal.b * _NormalMap.b));
+                float3 finalNormal = _UseNormalMap ? normalBlend : WorldSpaceNormal;
+
+                float ETA = _Refractive_Index_Origin / _Refractive_Index_Target;
+
+                float3 refractedVector = refract(
+                    normalize(-1 * mul((float3x3)UNITY_MATRIX_M, transpose(mul(UNITY_MATRIX_I_M, UNITY_MATRIX_I_V)) [2].xyz)),
+                    normalize(finalNormal),
+                    ETA);
+
+                float3 positionRefracted = AbsoluteWorldSpacePosition + normalize(refractedVector);
+
+                float4 positionRefractedProjected = mul(UNITY_MATRIX_VP, float4(positionRefracted, 1.0));
+
+                float4 screenPos = ComputeScreenPos(positionRefractedProjected);
+
+                float2 sceneUV = screenPos.xy / screenPos.ww;
+
+                return sceneUV;
+            }
+
             SurfaceDescription SurfaceDescriptionFunction(SurfaceDescriptionInputs IN)
             {
                 SurfaceDescription surface = (SurfaceDescription)0;
@@ -288,12 +321,26 @@ Shader "Nihit/GlassURP"
                 float tiledNoise = SimpleNoise(IN.uv0.xy, _Tiling);
 
                 float3 noiseDistortion = NormalFromHeight(tiledNoise, _DisortStrength/5000.0, IN.WorldSpacePosition, tbnMatrix);
+
                 float3 noiseTintTextureDistortion = noiseDistortion * _TintTextureDistortion.xxx;
                 float2 distortedUV = IN.uv0.xy + noiseTintTextureDistortion.xy;
-                float4 texColor = SAMPLE_TEXTURE2D(unityTexture2D.tex, unityTexture2D.samplerstate, unityTexture2D.GetTransformedUV(distortedUV) );
+                float4 texColor = SAMPLE_TEXTURE2D(unityTexture2D.tex, unityTexture2D.samplerstate, unityTexture2D.GetTransformedUV(distortedUV));
                 float4 tintedTexColor = texColor * _TintColor;
-                float3 sceenPos = float3(IN.NDCPosition.xy, 0) + noiseDistortion;
-                float3 sceneColor = SampleSceneColor(sceenPos.xy);
+
+                float2 refractUV0 = RefractUV(_IOR, 1.0, 0.0, float3 (0, 0, 0), IN.WorldSpaceNormal, IN.AbsoluteWorldSpacePosition);
+                float3 sceenPos0 = float3(refractUV0, 0) + noiseDistortion;
+                float3 sceneColor0 = SampleSceneColor(sceenPos0.xy);
+
+                float2 refractUV1 = RefractUV(_IOR * (1.0 + _ChromaticAberration), 1.0, 0.0, float3 (0, 0, 0), IN.WorldSpaceNormal, IN.AbsoluteWorldSpacePosition);
+                float3 sceenPos1 = float3(refractUV1, 0) + noiseDistortion;
+                float3 sceneColor1 = SampleSceneColor(sceenPos1.xy);
+
+                float2 refractUV2 = RefractUV(_IOR * (1.0 + _ChromaticAberration * 2.0), 1.0, 0.0, float3 (0, 0, 0), IN.WorldSpaceNormal, IN.AbsoluteWorldSpacePosition);
+                float3 sceenPos2 = float3(refractUV2, 0) + noiseDistortion;
+                float3 sceneColor2 = SampleSceneColor(sceenPos2.xy);
+
+                float3 sceneColor = float3(sceneColor0.r, sceneColor1.g, sceneColor1.b);
+
                 float3 tintedTexSceneColor = tintedTexColor.xyz * sceneColor;
 
                 float3 normalTS = NormalFromHeight(tiledNoise, _NormalStrength/5000.0, IN.WorldSpacePosition, tbnMatrix);
@@ -303,9 +350,11 @@ Shader "Nihit/GlassURP"
 
                 float3 refProbeColorWithStrength = refProbeColor * _ReflectionStrength.xxx;
 
+                float3 tintedTexSceneColorEmissive = _UseEmissive ? tintedTexSceneColor : float3(0, 0, 0);
+
                 surface.BaseColor = tintedTexSceneColor;
                 surface.NormalTS = normalTS;
-                surface.Emission = refProbeColorWithStrength;
+                surface.Emission = lerp(tintedTexSceneColorEmissive, refProbeColorWithStrength, _ReflectionStrength/5.0);
                 surface.Metallic = _Metallic;
                 surface.Smoothness = _Smoothness;
                 surface.Occlusion = 1.0;
