@@ -97,7 +97,7 @@ public class TestGlass : MonoBehaviour
 
             if (urpAsset != null)
             {
-                urpAsset.supportsCameraOpaqueTexture = (suppportsCameraOpaqueTexture == 1);
+                urpAsset.supportsCameraOpaqueTexture = (suppportsCameraOpaqueTexture == 1) ? true : false;
             }
 
             _supportsCameraOpaqueTextureInputField.text = suppportsCameraOpaqueTexture.ToString();
