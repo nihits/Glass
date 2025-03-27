@@ -3,7 +3,7 @@ Shader "Nihit/GlassURP"
     Properties
     {
         _TintTexture("TintTexture", 2D) = "white" {}
-        _DistortionOnTexture("DistortionOnTexture", Range(0, 1)) = 0
+        _TintTextureDistortion("TintTextureDistortion", Range(0, 1)) = 0
         _TintColor("TintColor", Color) = (0, 1, 0.8042793, 0)
         _Metallic("Metallic", Range(0, 1)) = 0.1
         _Smoothness("Smoothness", Range(0, 1)) = 1
@@ -75,7 +75,7 @@ Shader "Nihit/GlassURP"
                 float _ReflectionStrength;
                 float4 _TintTexture_TexelSize;
                 float4 _TintTexture_ST;
-                float _DistortionOnTexture;
+                float _TintTextureDistortion;
             CBUFFER_END
 
             SAMPLER(SamplerState_Linear_Repeat);
@@ -288,8 +288,8 @@ Shader "Nihit/GlassURP"
                 float tiledNoise = SimpleNoise(IN.uv0.xy, _Tiling);
 
                 float3 noiseDistortion = NormalFromHeight(tiledNoise, _DisortStrength/5000.0, IN.WorldSpacePosition, tbnMatrix);
-                float3 noiseDistortionOnTex = noiseDistortion * _DistortionOnTexture.xxx;
-                float2 distortedUV = IN.uv0.xy + noiseDistortionOnTex.xy;
+                float3 noiseTintTextureDistortion = noiseDistortion * _TintTextureDistortion.xxx;
+                float2 distortedUV = IN.uv0.xy + noiseTintTextureDistortion.xy;
                 float4 texColor = SAMPLE_TEXTURE2D(unityTexture2D.tex, unityTexture2D.samplerstate, unityTexture2D.GetTransformedUV(distortedUV) );
                 float4 tintedTexColor = texColor * _TintColor;
                 float3 sceenPos = float3(IN.NDCPosition.xy, 0) + noiseDistortion;
