@@ -1,4 +1,4 @@
-Shader "Nihit/GlassURP"
+﻿Shader "Nihit/Glass"
 {
     Properties
     {
