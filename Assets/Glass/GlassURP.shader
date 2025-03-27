@@ -58,6 +58,9 @@ Shader "Nihit/GlassURP"
             #define VARYINGS_NEED_SHADOW_COORD
             #define REQUIRE_OPAQUE_TEXTURE
 
+            #define SHADERPASS_SHADOWCASTER (3)
+            #define SHADERPASS_META (4)
+
             #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
             #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Texture.hlsl"
             #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Hashes.hlsl"
