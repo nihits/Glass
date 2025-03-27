@@ -2,9 +2,9 @@
 {
     Properties
     {
-        _IOR("IOR", Range(1, 5)) = 1.52
+        _IOR("IOR", Range(1, 5)) = 1.5
         _ChromaticAberration("ChromaticAberration", Range(0, 0.2)) = 0
-        _TintColor("TintColor", Color) = (0, 1, 0.8042793, 0)
+        _TintColor("TintColor", Color) = (0, 1, 0.8, 0)
         _TintTexture("TintTexture", 2D) = "white" {}
         _TintTextureDistortion("TintTextureDistortion", Range(0, 1)) = 0
         [Normal][NoScaleOffset]_NormalMap("NormalMap", 2D) = "bump" {}
@@ -446,4 +446,4 @@
             ENDHLSL
         }
     }
-}
+} // Copyright Nihit Saxena 2025
