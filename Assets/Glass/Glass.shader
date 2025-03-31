@@ -251,7 +251,7 @@
                 return t;
             }
 
-            half SimpleNoise(half2 UV, half Scale)
+            half SimpleNoise(half2 UV, float Scale)
             {
                 half t = 0.0;
 
