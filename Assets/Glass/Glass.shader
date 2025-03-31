@@ -270,7 +270,7 @@
                 return t;
             }
 
-            half3 NormalFromHeight(half In, half Strength, half3 Position, half3x3 TangentMatrix)
+            half3 NormalFromHeight(half In, half Strength, float3 Position, half3x3 TangentMatrix)
             {
                 half3 worldDerivativeX = ddx(Position);
                 half3 worldDerivativeY = ddy(Position);
