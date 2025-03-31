@@ -227,7 +227,7 @@
                 half Alpha;
             };
 
-            inline half ValueNoise(half2 uv)
+            inline half ValueNoise(float2 uv)
             {
                 half2 i = floor(uv);
                 half2 f = frac(uv);
@@ -235,15 +235,15 @@
                 f = f * f * (3.0 - 2.0 * f);
                 uv = abs(frac(uv) - 0.5);
 
-                half2 c0 = i + half2(0.0, 0.0);
-                half2 c1 = i + half2(1.0, 0.0);
-                half2 c2 = i + half2(0.0, 1.0);
-                half2 c3 = i + half2(1.0, 1.0);
+                half2 c0 = i + float2(0.0, 0.0);
+                half2 c1 = i + float2(1.0, 0.0);
+                half2 c2 = i + float2(0.0, 1.0);
+                half2 c3 = i + float2(1.0, 1.0);
 
-                half r0; Hash_LegacySine_2_1_half(c0, r0);
-                half r1; Hash_LegacySine_2_1_half(c1, r1);
-                half r2; Hash_LegacySine_2_1_half(c2, r2);
-                half r3; Hash_LegacySine_2_1_half(c3, r3);
+                half r0; Hash_LegacySine_2_1_float(c0, r0);
+                half r1; Hash_LegacySine_2_1_float(c1, r1);
+                half r2; Hash_LegacySine_2_1_float(c2, r2);
+                half r3; Hash_LegacySine_2_1_float(c3, r3);
 
                 half bottomOfGrid = lerp(r0, r1, f.x);
                 half topOfGrid = lerp(r2, r3, f.x);
