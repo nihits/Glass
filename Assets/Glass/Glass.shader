@@ -225,6 +225,17 @@
                 half Alpha;
             };
 
+            void Hash_LegacySqrt_2_1_float(float2 i, out float o)
+            {
+                float angle = dot(i, float2(12.9898, 78.233));
+            #if defined(SHADER_API_MOBILE) && (defined(SHADER_API_GLES) || defined(SHADER_API_GLES3) || defined(SHADER_API_VULKAN))
+                // 'sin()' has bad precision on Mali GPUs for inputs > 10000
+                angle = fmod(angle, TWO_PI); // Avoid large inputs to sin()
+            #endif
+                //o = frac(sin(angle)*43758.5453);
+                o = frac(sqrt(angle)*43758.5453);
+            }
+
             inline half ValueNoise(float2 uv)
             {
                 half2 i = floor(uv);
@@ -238,10 +249,10 @@
                 half2 c2 = i + float2(0.0, 1.0);
                 half2 c3 = i + float2(1.0, 1.0);
 
-                half r0; Hash_LegacySine_2_1_float(c0, r0);
-                half r1; Hash_LegacySine_2_1_float(c1, r1);
-                half r2; Hash_LegacySine_2_1_float(c2, r2);
-                half r3; Hash_LegacySine_2_1_float(c3, r3);
+                half r0; Hash_LegacySqrt_2_1_float(c0, r0);
+                half r1; Hash_LegacySqrt_2_1_float(c1, r1);
+                half r2; Hash_LegacySqrt_2_1_float(c2, r2);
+                half r3; Hash_LegacySqrt_2_1_float(c3, r3);
 
                 half bottomOfGrid = lerp(r0, r1, f.x);
                 half topOfGrid = lerp(r2, r3, f.x);
