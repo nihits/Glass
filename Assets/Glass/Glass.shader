@@ -128,8 +128,6 @@
                 UNITY_TRANSFER_INSTANCE_ID(input, output);
                 UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
 
-                VertexPositionInputs vertexInput = GetVertexPositionInputs(input.positionOS.xyz);
-
                 half3 positionWS = TransformObjectToWorld(input.positionOS);
                 half3 normalWS = TransformObjectToWorldNormal(input.normalOS);
                 half4 tangentWS = half4(TransformObjectToWorldDir(input.tangentOS.xyz), input.tangentOS.w);
